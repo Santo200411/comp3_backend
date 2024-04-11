@@ -1,0 +1,25 @@
+[
+    
+    {
+      "id": 1001,
+      "title": "chaqueta negra plumas",
+      "description": "Chaqueta plumas otono Women, negra",
+      "code": "7989",
+      "price": "200",
+      "status": "true",
+      "stock": "10",
+      "category": "clothes winter"
+    },
+  
+    {
+      "id": 1002,
+      "title": "chaqueta roja plumas",
+      "description": "Chaqueta plumas inv Women, roja",
+      "code": "7990",
+      "price": "20",
+      "status": "true",
+      "stock": "10",
+      "category": "clothes winter"
+    }
+
+]

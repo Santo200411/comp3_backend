@@ -48,7 +48,7 @@ class ProductManager {
      * @param {number} stock 
      */
 
-    addProduct= async (title, description, price, thumbnail, code, stock) => {
+    addProduct = async (title, description, price, thumbnail, code, stock) => {
         const product ={
             id: this.#getNextId(),
             title,
