@@ -1,40 +1,24 @@
 import express from 'express'
-import { ProductManager } from './productManager.js'
+import productsRouter from './routes/products_router.js'
+import cartsRouter from './routes/cart_router.js'
+
 
 const app = express()
+const PORT = 5000
 
-server.use(express.json());
+server.use(express.json())
 
+app.use('/api/products', productsRouter)
+app.use('/api/carts', cartsRouter)
 
-app.get("/products", async (req, resp) => {
-    try{
-    const pm = new ProductManager()
-    const {limit} = req.query
-
-    const products = await pm.getProducts()
-    if(limit && !isNaN(limit)) {
-        const scope = Number(limit)
-        products = products.slice(0, scope)
-    }
-    resp.send(productos)
-    }catch (error){
-        throw new error("error")
-    }
-})
-
-app.get("/products/:id", async (req, resp) =>{
-    try{
-        const { id } = req.params()
-        const pm = new ProductManager()
-        const product = await pm.getProductsById(id)
-        resp.send(product)
-        }catch (error){
-            throw new error("error")
-        }
-    resp.send()
-})
-
-const PORT = 5000;
-server.listen(PORT, () => {
+app.use((err, req, res, next) => {
+    console.error(err);
+    const errorMessage = err.message || 'Internal Server Error';
+    const statusCode = err.statusCode || 500;
+    const errorDetails = err.details || null;
+    res.status(statusCode).json({ error: errorMessage, details: errorDetails });
+  });
+  
+app.listen(PORT, () => {
   console.log(`Server listening on port ${PORT}`);
 });
