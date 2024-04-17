@@ -1,132 +1,72 @@
+import fs from 'fs/promises';
+import { v4 as uuidv4 } from 'uuid';
 
-class ProductManager {
-    #products
-
-    constructor(path){
-        this.#products = []
-        this.path = path
+export class ProductManager {
+    constructor(filePath) {
+        this.filePath = filePath;
     }
 
-    readFile = async () => {
-        try{
-            const dataJson = await fs.promises.readFile()
-            return JSON.parse(dataJson)
-        } catch(error){
-            throw new error("Error reading file")
-        }
-   }
-    getProductById = async(id) => {
+    async getAllProducts() {
         try {
-            const product = await this.readFile()
-            product = product.find((product) => product.id = id)
-            if(!product){
-                throw new error("Product doesn't exist")
-            }
-
-            return product
-        }catch(error){
-            throw new error("Error")
+            const data = await fs.readFile(this.filePath, 'utf8');
+            return JSON.parse(data);
+        } catch (error) {
+            throw new Error('Error reading products file');
         }
     }
 
-    getProducts = async() => {
+    async getProductById(productId) {
         try {
-            const arrayProducts = await this.readFile()
-            return arrayProducts
-        } catch(error){
-            throw new error("Error when reading products")
+            const data = await fs.readFile(this.filePath, 'utf8');
+            const products = JSON.parse(data);
+            return products.find(product => product.id === productId);
+        } catch (error) {
+            throw new Error('Error reading products file');
         }
     }
-    
-    /**
-     * 
-     * @param {string} title 
-     * @param {string} description 
-     * @param {number} price 
-     * @param {string} thumbnail 
-     * @param {string} code 
-     * @param {number} stock 
-     */
 
-    addProduct = async (title, description, price, thumbnail, code, stock) => {
-        const product ={
-            id: this.#getNextId(),
-            title,
-            description,
-            price,
-            thumbnail,
-            code,
-            stock
-        };
-
-        if (!title || !description || !price || !thumbnail || !code || !stock) {
-            throw new Error("All blanks must be filled, please try again");
-          }
-
-        const duplicated = this.#products.find((product) => product.code === code)
-    
-        if(duplicated){
-            throw new error(`Error, code "${code} already exists`)
-        } else {
-            await this.#products.push(product);
-            await fs.promises.writeFile(
-              `${this.path}`,
-              JSON.stringify(this.#products, null, "\t"),
-              "utf-8"
-            );
-            console.log("The product has been added");
+    async addProduct(newProduct) {
+        try {
+            const data = await fs.readFile(this.filePath, 'utf8');
+            const products = JSON.parse(data);
+            newProduct.id = uuidv4(); // Generate a unique ID
+            products.push(newProduct);
+            await fs.writeFile(this.filePath, JSON.stringify(products, null, 2));
+            return newProduct;
+        } catch (error) {
+            throw new Error('Error adding product');
         }
     }
-    #getNextId(){
-        if(this.#products.length === 0) {
-            return 1
-        } else {
-            return this.#products.at(-1).id + 1
-        }
-        
-    }
 
-    // Entregable 2
-
-    deleteProduct = async (id) =>{
-        try{
-            const arrayProducts = await this.readFile()
-            const index = arrayProducts.findIndex((product) => product.id === id)
-            if(indice === -1){
-                throw new error("Product doesn't exist")
+    async updateProduct(productId, updatedFields) {
+        try {
+            const data = await fs.readFile(this.filePath, 'utf8');
+            let products = JSON.parse(data);
+            const index = products.findIndex(product => product.id === productId);
+            if (index === -1) {
+                throw new Error('Error, product not found');
             }
-            arrayProducts.splice(indice, 1)
-            await fs.promises.writeFile(
-                `${this.path}`,
-                JSON.stringify(productos, null, "\t"),
-                "utf-8"
-              );
-            console.log("Product has been deleted succesfully")
-        }catch(error){
-            throw new error("Error")
+            products[index] = { ...products[index], ...updatedFields };
+            await fs.writeFile(this.filePath, JSON.stringify(products, null, 2));
+            return products[index];
+        } catch (error) {
+            throw new Error('Error updating product');
         }
     }
 
-    updateProduct = async (id, updatedProduct) =>{
-        try{
-            const arrayProducts = await this.readFile()
-            const index = arrayProducts.findIndex((product) => product.id === id)
-            if(index === -1){
-                throw new error("Product doesn't exist")
+    async deleteProduct(productId) {
+        try {
+            const data = await fs.readFile(this.filePath, 'utf8');
+            let products = JSON.parse(data);
+            const index = products.findIndex(product => product.id === productId);
+            if (index === -1) {
+                throw new Error('Product not found');
             }
-            arrayProducts[index] = { ...this.#products[index], ...updatedProduct };
-            await fs.promises.writeFile(
-                `${this.path}`,
-                JSON.stringify(productos, null, "\t"),
-                "utf-8"
-              );
-            console.log("Product has been updated succesfully")
-        }catch(error){
-            throw new error("Error")
+            products.splice(index, 1);
+            await fs.writeFile(this.filePath, JSON.stringify(products, null, 2));
+            return 'Product deleted successfully';
+        } catch (error) {
+            throw new Error('Error deleting product');
         }
     }
-
-
 }
-
-export default ProductManager;
